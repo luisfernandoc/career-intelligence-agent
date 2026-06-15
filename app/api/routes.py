@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.schemas.job import JobAnalysisRequest, GenerateQuestionsRequest, EvaluateAnswerRequest
+from app.schemas.job import JobAnalysisRequest, GenerateQuestionsRequest, EvaluateAnswerRequest, StudyPlanRequest
 from app.services.analysis_service import AnalysisService
 
 router = APIRouter()
@@ -34,3 +34,13 @@ def evaluate_answer(request: EvaluateAnswerRequest):
     )
 
     return {"evaluation": result}
+
+@router.post("/study-plan")
+def generate_study_plan(request: StudyPlanRequest):
+    result = analysis_service.generate_study_plan(
+        gaps=request.gaps,
+        target_role=request.target_role,
+        available_days=request.available_days,
+    )
+
+    return {"study_plan": result}

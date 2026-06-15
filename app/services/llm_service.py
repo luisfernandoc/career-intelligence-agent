@@ -90,3 +90,37 @@ Be constructive and specific.
             user_prompt=user_prompt,
             temperature=0.4,
         )
+    
+    def generate_study_plan(self, gaps: list[str], target_role: str, available_days: int,) -> str:
+        system_prompt = """
+You are an expert career coach and technical interview preparation advisor.
+Create realistic, focused and practical study plans.
+"""
+
+        user_prompt = f"""
+Create a study plan for the candidate.
+
+Target role:
+{target_role}
+
+Skill gaps:
+{", ".join(gaps)}
+
+Available days:
+{available_days}
+
+Return:
+1. Main preparation priorities
+2. Daily study plan
+3. Practice exercises
+4. Suggested mini-project improvements
+5. Final recommendation
+
+Keep it realistic and focused.
+"""
+
+        return self.provider.generate_response(
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            temperature=0.3,
+        )
