@@ -22,3 +22,6 @@ Roadmap:
 - [ ] RAG
 - [ ] Agent tools
 - [ ] Frontend
+
+Future improvement:
+Use structured JSON output from the LLM.

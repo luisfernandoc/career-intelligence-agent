@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.schemas.job import JobAnalysisRequest, GenerateQuestionsRequest
+from app.schemas.job import JobAnalysisRequest, GenerateQuestionsRequest, EvaluateAnswerRequest
 from app.services.analysis_service import AnalysisService
 
 router = APIRouter()
@@ -25,3 +25,12 @@ def generate_questions(request: GenerateQuestionsRequest):
     )
 
     return {"questions": result}
+
+@router.post("/evaluate-answer")
+def evaluate_answer(request: EvaluateAnswerRequest):
+    result = analysis_service.evaluate_answer(
+        question=request.question,
+        answer=request.answer,
+    )
+
+    return {"evaluation": result}
