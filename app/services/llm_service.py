@@ -9,31 +9,45 @@ class LLMService:
         self.provider = get_llm_provider()
 
     def analyze_job(self, resume: str, job_description: str) -> str:
-        system_prompt = "You are an expert career and technical interview advisor."
+        system_prompt = """
+    You are an expert career and technical interview advisor.
+
+    You must return ONLY valid JSON.
+    Do not include markdown.
+    Do not include explanations outside the JSON.
+    """
 
         user_prompt = f"""
-You are a career intelligence assistant.
+    Analyze the candidate resume against the job description.
 
-Analyze the candidate resume against the job description.
+    Return this exact JSON structure:
 
-Return:
-- Match score from 0 to 100
-- Main strengths
-- Skill gaps
-- Interview risks
-- Short recommendation
+    {{
+    "match_score": 0,
+    "strengths": [],
+    "gaps": [],
+    "interview_risks": [],
+    "recommendation": ""
+    }}
 
-Resume:
-{resume}
+    Rules:
+    - match_score must be a number from 0 to 100
+    - strengths must be a list of short skill names
+    - gaps must be a list of short skill names
+    - interview_risks must be a list of short risks
+    - recommendation must be a short paragraph
 
-Job Description:
-{job_description}
-"""
+    Resume:
+    {resume}
+
+    Job Description:
+    {job_description}
+    """
 
         return self.provider.generate_response(
             system_prompt=system_prompt,
             user_prompt=user_prompt,
-            temperature=0.3,
+            temperature=0.2,
         )
 
     def generate_questions(self, resume: str, job_description: str) -> str:
