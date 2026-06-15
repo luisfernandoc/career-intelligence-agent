@@ -10,3 +10,6 @@ class AnalysisService:
 
     def generate_questions(self, resume: str, job_description: str) -> str:
         return self.llm_service.generate_questions(resume, job_description)
+
+    def evaluate_answer(self, question: str, answer: str) -> str:
+        return self.llm_service.evaluate_answer(question, answer)

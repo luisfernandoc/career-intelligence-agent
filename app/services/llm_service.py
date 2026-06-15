@@ -61,3 +61,32 @@ Job Description:
             user_prompt=user_prompt,
             temperature=0.4,
         )
+    
+    def evaluate_answer(self, question: str, answer: str) -> str:
+        system_prompt = "You are an expert technical interviewer. Evaluate interview answers fairly and professionally."
+
+        user_prompt = f"""
+Question:
+
+{question}
+
+Candidate Answer:
+
+{answer}
+
+Evaluate:
+
+1. Score from 1 to 10
+2. Strengths
+3. Weaknesses
+4. Missing concepts
+5. Improved answer
+
+Be constructive and specific.
+"""
+
+        return self.provider.generate_response(
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            temperature=0.4,
+        )
