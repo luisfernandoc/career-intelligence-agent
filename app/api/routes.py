@@ -1,3 +1,4 @@
+import json
 from fastapi import APIRouter, Depends
 from app.schemas.job import JobAnalysisRequest, GenerateQuestionsRequest, EvaluateAnswerRequest, StudyPlanRequest
 from app.services.analysis_service import AnalysisService
@@ -27,12 +28,27 @@ def analyze_job(request: JobAnalysisRequest, db: Session = Depends(get_db)):
     record = JobAnalysis(
         resume=request.resume,
         job_description=request.job_description,
-        analysis_result=result,
+        analysis_result=json.dumps(result),
     )
 
     db.add(record)
     db.commit()
     db.refresh(record)
+
+    strengths = result.get("strengths", [])
+    gaps = result.get("gaps", [])
+
+    insights_service.update_many_skill_insights(
+        db=db,
+        skills=strengths,
+        skill_type="strength",
+    )
+
+    insights_service.update_many_skill_insights(
+        db=db,
+        skills=gaps,
+        skill_type="gap",
+    )
 
     return {
         "id": record.id,
@@ -101,12 +117,6 @@ def generate_study_plan(request: StudyPlanRequest, db: Session = Depends(get_db)
     db.add(record)
     db.commit()
     db.refresh(record)
-
-    insights_service.update_many_skill_insights(
-        db=db,
-        skills=request.gaps,
-        skill_type="gap",
-    )
 
     return {
         "id": record.id,
