@@ -15,13 +15,21 @@ Current Features:
 - Job analysis
 - Interview question generation
 
-Roadmap:
+## Roadmap
 
-- [ ] Interview simulation
-- [ ] Career memory
-- [ ] RAG
-- [ ] Agent tools
-- [ ] Frontend
+### Phase 1 — Functional MVP
+- [x] Health check
+- [x] Job analysis
+- [x] Interview question generation
+- [x] Answer evaluation
+- [x] Study plan generation
+
+### Phase 2 — Professional Memory
+- [ ] Store analyzed jobs
+- [ ] Store generated questions
+- [ ] Store user answers
+- [ ] Store evaluations
+- [ ] Track recurring skill gaps
 
 Future improvement:
 Use structured JSON output from the LLM.
