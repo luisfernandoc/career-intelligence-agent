@@ -1,6 +1,7 @@
 import json
-from fastapi import APIRouter, Depends
-from app.schemas.job import JobAnalysisRequest, GenerateQuestionsRequest, EvaluateAnswerRequest, StudyPlanRequest
+from fastapi import APIRouter, Depends, UploadFile, File, Form
+from app.schemas.job import JobAnalysisRequest, GenerateQuestionsRequest, EvaluateAnswerRequest, StudyPlanRequest, UploadDocumentRequest, AskCareerMemoryRequest
+from app.services.memory_service import MemoryService
 from app.services.analysis_service import AnalysisService
 from app.services.insights_service import InsightsService
 from sqlalchemy.orm import Session
@@ -16,6 +17,7 @@ router = APIRouter()
 
 analysis_service = AnalysisService()
 insights_service = InsightsService()
+memory_service = MemoryService()
 
 
 @router.post("/analyze-job")
@@ -170,3 +172,28 @@ def get_top_strengths(db: Session = Depends(get_db)):
     return {
         "top_strengths": top_strengths
     }
+
+@router.post("/upload-document")
+def upload_document(request: UploadDocumentRequest):
+    return memory_service.upload_document(
+        title=request.title,
+        content=request.content,
+        document_type=request.document_type,
+    )
+
+
+@router.post("/ask-career-memory")
+def ask_career_memory(request: AskCareerMemoryRequest):
+    return memory_service.ask_career_memory(
+        question=request.question,
+    )
+
+@router.post("/upload-file")
+async def upload_file(file: UploadFile = File(...), document_type: str = Form(default="general")):
+    content = await file.read()
+
+    return memory_service.upload_file(
+        file_name=file.filename,
+        content=content,
+        document_type=document_type,
+    )
