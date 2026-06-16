@@ -1,5 +1,6 @@
 import chromadb
 from chromadb.utils import embedding_functions
+import uuid
 from app.services.llm_service import LLMService
 from app.db.models import Document
 
@@ -23,14 +24,15 @@ class MemoryService:
 
     def upload_document(
         self,
+        db,
         title: str,
         content: str,
         document_type: str,
     ):
-        document_id = title.lower().replace(" ", "_")
+        chroma_id = str(uuid.uuid4())
 
         self.collection.add(
-            ids=[document_id],
+            ids=[chroma_id],
             documents=[content],
             metadatas=[
                 {
@@ -40,23 +42,26 @@ class MemoryService:
             ],
         )
 
-        self.save_document_metadata(
+        document = self.save_document_metadata(
             db=db,
             title=title,
             document_type=document_type,
             source="manual",
-            chroma_id=document_id,
+            chroma_id=chroma_id,
         )
 
         return {
-            "document_id": document_id,
-            "title": title,
-            "document_type": document_type,
+            "id": document.id,
+            "chroma_id": chroma_id,
+            "title": document.title,
+            "document_type": document.document_type,
+            "source": document.source,
             "status": "stored",
         }
 
     def upload_file(
         self,
+        db,
         file_name: str,
         content: bytes,
         document_type: str = "general",
@@ -82,10 +87,10 @@ class MemoryService:
         except UnicodeDecodeError:
             text_content = content.decode("latin-1")
 
-        document_id = file_name.lower().replace(" ", "_")
+        chroma_id = str(uuid.uuid4())
 
         self.collection.add(
-            ids=[document_id],
+            ids=[chroma_id],
             documents=[text_content],
             metadatas=[
                 {
@@ -96,18 +101,20 @@ class MemoryService:
             ],
         )
 
-        self.save_document_metadata(
+        document = self.save_document_metadata(
             db=db,
             title=file_name,
             document_type=document_type,
             source="file_upload",
-            chroma_id=document_id,
+            chroma_id=chroma_id,
         )
 
         return {
-            "document_id": document_id,
+            "id": document.id,
+            "chroma_id": chroma_id,
             "file_name": file_name,
-            "document_type": document_type,
+            "document_type": document.document_type,
+            "source": document.source,
             "characters_stored": len(text_content),
             "status": "stored",
         }
