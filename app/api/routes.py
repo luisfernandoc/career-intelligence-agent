@@ -1,8 +1,10 @@
 import json
-from fastapi import APIRouter, Depends
-from app.schemas.job import JobAnalysisRequest, GenerateQuestionsRequest, EvaluateAnswerRequest, StudyPlanRequest
+from fastapi import APIRouter, Depends, UploadFile, File, Form
+from app.schemas.job import JobAnalysisRequest, GenerateQuestionsRequest, EvaluateAnswerRequest, StudyPlanRequest, UploadDocumentRequest, AskCareerMemoryRequest
+from app.services.memory_service import MemoryService
 from app.services.analysis_service import AnalysisService
 from app.services.insights_service import InsightsService
+from app.db.models import Document
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.db.models import (
@@ -16,6 +18,7 @@ router = APIRouter()
 
 analysis_service = AnalysisService()
 insights_service = InsightsService()
+memory_service = MemoryService()
 
 
 @router.post("/analyze-job")
@@ -170,3 +173,69 @@ def get_top_strengths(db: Session = Depends(get_db)):
     return {
         "top_strengths": top_strengths
     }
+
+@router.post("/upload-document")
+def upload_document(request: UploadDocumentRequest, db: Session = Depends(get_db)):
+    return memory_service.upload_document(
+        db=db,
+        title=request.title,
+        content=request.content,
+        document_type=request.document_type,
+    )
+
+
+@router.post("/ask-career-memory")
+def ask_career_memory(request: AskCareerMemoryRequest):
+    return memory_service.ask_career_memory(
+        question=request.question,
+    )
+
+@router.post("/upload-file")
+async def upload_file(file: UploadFile = File(...), document_type: str = Form(default="general"), db: Session = Depends(get_db)):
+    content = await file.read()
+
+    return memory_service.upload_file(
+        db=db,
+        file_name=file.filename,
+        content=content,
+        document_type=document_type,
+    )
+
+@router.get("/documents")
+def get_documents(
+    db: Session = Depends(get_db),
+):
+    documents = db.query(Document).all()
+
+    return {
+        "documents": [
+            {
+                "id": doc.id,
+                "title": doc.title,
+                "document_type": doc.document_type,
+                "source": doc.source,
+                "created_at": doc.created_at,
+            }
+            for doc in documents
+        ]
+    }
+
+@router.get("/documents/{document_id}")
+def get_document_by_id(
+    document_id: int,
+    db: Session = Depends(get_db),
+):
+    return memory_service.get_document_by_id(
+        db=db,
+        document_id=document_id,
+    )
+
+@router.delete("/documents/{document_id}")
+def delete_document(
+    document_id: int,
+    db: Session = Depends(get_db),
+):
+    return memory_service.delete_document(
+        db=db,
+        document_id=document_id,
+    )
