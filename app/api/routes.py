@@ -197,3 +197,42 @@ async def upload_file(file: UploadFile = File(...), document_type: str = Form(de
         content=content,
         document_type=document_type,
     )
+
+@router.get("/documents")
+def get_documents(
+    db: Session = Depends(get_db),
+):
+    documents = db.query(Document).all()
+
+    return {
+        "documents": [
+            {
+                "id": doc.id,
+                "title": doc.title,
+                "document_type": doc.document_type,
+                "source": doc.source,
+                "created_at": doc.created_at,
+            }
+            for doc in documents
+        ]
+    }
+
+@router.get("/documents/{document_id}")
+def get_document_by_id(
+    document_id: int,
+    db: Session = Depends(get_db),
+):
+    return memory_service.get_document_by_id(
+        db=db,
+        document_id=document_id,
+    )
+
+@router.delete("/documents/{document_id}")
+def delete_document(
+    document_id: int,
+    db: Session = Depends(get_db),
+):
+    return memory_service.delete_document(
+        db=db,
+        document_id=document_id,
+    )

@@ -1,6 +1,7 @@
 import chromadb
 from chromadb.utils import embedding_functions
 from app.services.llm_service import LLMService
+from app.db.models import Document
 
 
 class MemoryService:
@@ -37,6 +38,14 @@ class MemoryService:
                     "document_type": document_type,
                 }
             ],
+        )
+
+        self.save_document_metadata(
+            db=db,
+            title=title,
+            document_type=document_type,
+            source="manual",
+            chroma_id=document_id,
         )
 
         return {
@@ -85,6 +94,14 @@ class MemoryService:
                     "source": "file_upload",
                 }
             ],
+        )
+
+        self.save_document_metadata(
+            db=db,
+            title=file_name,
+            document_type=document_type,
+            source="file_upload",
+            chroma_id=document_id,
         )
 
         return {
@@ -139,4 +156,87 @@ Answer clearly and cite the relevant document titles when possible.
         return {
             "answer": answer,
             "sources": sources,
+        }
+
+    def get_document_by_id(
+        self,
+        db,
+        document_id: int,
+    ):
+        document = (
+            db.query(Document)
+            .filter(Document.id == document_id)
+            .first()
+        )
+
+        if not document:
+            return {
+                "status": "error",
+                "message": "Document not found",
+            }
+
+        return {
+            "id": document.id,
+            "title": document.title,
+            "document_type": document.document_type,
+            "source": document.source,
+            "chroma_id": document.chroma_id,
+            "created_at": document.created_at,
+        }
+
+    def save_document_metadata(
+        self,
+        db,
+        title,
+        document_type,
+        source,
+        chroma_id,
+    ):
+        document = Document(
+            title=title,
+            document_type=document_type,
+            source=source,
+            chroma_id=chroma_id,
+        )
+
+        db.add(document)
+        db.commit()
+        db.refresh(document)
+
+        return document
+
+    def delete_document(
+        self,
+        db,
+        document_id: int,
+    ):
+        document = (
+            db.query(Document)
+            .filter(Document.id == document_id)
+            .first()
+        )
+
+        if not document:
+            return {
+                "status": "error",
+                "message": "Document not found",
+            }
+
+        try:
+            self.collection.delete(
+                ids=[document.chroma_id]
+            )
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": f"Failed to delete from Chroma: {str(e)}",
+            }
+
+        db.delete(document)
+        db.commit()
+
+        return {
+            "message": "Document deleted successfully",
+            "document_id": document_id,
+            "title": document.title,
         }

@@ -227,10 +227,14 @@ This enables:
 
 ### Phase 3 — Career Knowledge Base
 
-- [ ] Document upload
-- [ ] Embeddings
-- [ ] ChromaDB integration
-- [ ] Career memory retrieval
+- [x] Manual document ingestion
+- [x] File upload ingestion
+- [X] Embeddings
+- [X] ChromaDB integration
+- [X] Career memory retrieval
+- [ ] PDF support
+- [ ] DOCX support
+- [ ] Repository ingestion
 - [ ] Resume knowledge base
 - [ ] Interview notes retrieval
 

@@ -51,3 +51,13 @@ class SkillInsight(Base):
     count = Column(Integer, default=1)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+class Document(Base):
+    __tablename__ = "documents"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False)
+    document_type = Column(String(100), nullable=False)
+    source = Column(String(100), nullable=False,)
+    chroma_id = Column(String(255), nullable=False, unique=True,)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(),)
